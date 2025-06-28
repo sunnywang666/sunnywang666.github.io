@@ -31,7 +31,7 @@
                 <p><strong>项目动机：</strong>为解决“学”与“练”脱节的问题，我构思并开发了这款应用。它能将任何文本资料迅速转化为结构化的学习卡片，并提供即时的AI测评反馈，从而形成“学习-练习-测评”的高效学习闭环。</p>
                 <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <h3 class="font-semibold text-amber-800">开发者注记 (Developer's Note)</h3>
-                    <p class="text-amber-700 mt-1">为确保流畅展示，当前为**“高保真交互原型”**。应用内的AI功能由前端脚本模拟，旨在完整呈现核心交互流程。导入导出和报告功能在展演模式下仅供演示，数据不会实际存储或传输。欢迎体验！</p>
+                    <p class="text-amber-700 mt-1">为确保流畅展示，当前为**“高保真交互原型”**。应用内的AI功能由前端脚本模拟，旨在完整呈现核心交互流程。导入导出和报告功能在展演模式下仅供演示。欢迎体验！</p>
                 </div>
             </div>
         </div>
@@ -62,6 +62,7 @@
                 <input type="file" id="file-input" class="hidden" accept=".json">
             </div>
         </aside>
+
         <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-8 flex-1">
             <div class="sticky top-0 bg-f3f4f6/80 backdrop-blur-sm z-10 py-4 mb-6"><input type="text" id="search-input" placeholder="搜索卡片内容..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 transition"></div>
             <div id="card-display-area" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
@@ -82,7 +83,6 @@
         const usePresetBtn = document.getElementById('use-preset-btn');
         const presetTextElement = document.getElementById('preset-text');
         const addBtnText = document.getElementById('add-btn-text');
-        const addBtnIcon = document.getElementById('add-btn-icon');
         const reportBtn = document.getElementById('report-btn');
         const exportBtn = document.getElementById('export-btn');
         const importBtn = document.getElementById('import-btn');
@@ -93,15 +93,15 @@
         const presetResultCard = { id: 4, knowledgePoint: "计算社会科学的核心", example: "核心在于将数据驱动的洞察力与社会科学的理论深度相结合。", history: [] };
         
         const cannedQuestions = {
-            1: { question: "计算传播学和传统传播学最主要的区别是什么？", keywords: ["计算", "数据", "方法"] },
-            2: { question: "社交网络分析可以用来解决什么实际问题？", keywords: ["关系", "核心", "结构", "社区"] },
-            3: { question: "请举一个你熟悉的自然语言处理(NLP)的应用。", keywords: ["翻译", "客服", "Siri", "情感分析"] }
+            "1": { question: "计算传播学与传统传播学最核心的方法论差异是什么？", keywords: ["计算", "数据", "方法", "量化"] },
+            "2": { question: "在社交网络分析中，“中心性”通常用来衡量什么？", keywords: ["重要", "核心", "影响", "关键"] },
+            "3": { question: "请简述“情感分析”在商业领域的一个应用场景。", keywords: ["评论", "评价", "口碑", "舆情", "品牌"] }
         };
 
         const initialCards = [
-            { id: 1, knowledgePoint: "计算传播学 (Computational Communication)", example: "例如，通过分析社交媒体上几百万条帖子，来研究某个热门话题的传播路径和关键影响者。", history: [] },
-            { id: 2, knowledgePoint: "社交网络分析 (Social Network Analysis)", example: "在一家公司里，通过分析员工间的邮件往来，可以发现非正式的沟通核心和信息枢纽。", history: [] },
-            { id: 3, knowledgePoint: "自然语言处理 (Natural Language Processing - NLP)", example: "机器翻译、智能客服、以及从大量用户评论中自动提取情感倾向（正面/负面）都是NLP的应用。", history: [] }
+            { id: 1, knowledgePoint: "计算传播学", example: "定义：一个跨学科领域，利用计算方法（如大数据分析、机器学习）来研究人类传播行为及其规律。\n应用：舆情分析、信息传播路径追踪。" },
+            { id: 2, knowledgePoint: "社交网络分析", example: "核心概念：节点(Node)、边(Edge)、中心性(Centrality)。\n应用：识别社群中的关键意见领袖（KOL）。" },
+            { id: 3, knowledgePoint: "自然语言处理 (NLP)", example: "核心任务：文本分类、情感分析、机器翻译。\n应用：从海量用户评论中自动判断产品口碑的好坏。" }
         ];
 
         function showToast(message, type = 'info') {
@@ -123,7 +123,7 @@
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-container-outer min-h-[18rem] h-auto';
             cardContainer.dataset.id = card.id;
-            const exampleHTML = card.example ? `<div class="example-block">${card.example}</div>` : '';
+            const exampleHTML = card.example ? `<div class="example-block">${card.example.replace(/\n/g, '<br>')}</div>` : '';
             cardContainer.innerHTML = `
                 <div class="card-inner">
                     <div class="card-front">
@@ -134,7 +134,7 @@
                     </div>
                     <div class="card-back flex flex-col justify-between">
                          <div id="test-session-${card.id}" class="card-content-area p-1">
-                             <p class="text-center text-gray-600">点击下方按钮开始自测</p>
+                             <p class="text-center text-gray-600 p-4">点击下方按钮，开始模拟自测，检验学习成果。</p>
                          </div>
                          <div class="flex-shrink-0 pt-2 mt-2 border-t">
                             <button data-id="${card.id}" class="generate-question-btn w-full bg-sky-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-600 transition">模拟AI出题</button>
@@ -181,7 +181,7 @@
                     newPoints.forEach(point => {
                         knowledgeCards.push({ id: Date.now() + Math.random(), knowledgePoint: point, example: '', history: [] });
                     });
-                    showToast(`成功生成 ${newPoints.length} 张新卡片！`, 'success');
+                     showToast(`成功生成 ${newPoints.length} 张新卡片！`, 'success');
                 }
                 renderCards(knowledgeCards);
                 knowledgeInput.value = '';
@@ -192,7 +192,7 @@
         
         function handleQuestionGeneration(cardId) {
             const sessionArea = document.getElementById(`test-session-${cardId}`);
-            const canned = cannedQuestions[`${cardId}`];
+            const canned = cannedQuestions[cardId];
             if (!canned) {
                 sessionArea.innerHTML = `<p class="text-center text-red-500 p-4">抱歉，该卡片暂无预设题目。</p>`;
                 return;
@@ -213,7 +213,7 @@
             if (!userAnswer) {
                 showToast("回答不能为空哦", "error"); return;
             }
-            const canned = cannedQuestions[`${cardId}`];
+            const canned = cannedQuestions[cardId];
             const isCorrect = canned.keywords.some(kw => userAnswer.toLowerCase().includes(kw.toLowerCase()));
             
             let feedbackHTML;
@@ -227,16 +227,8 @@
             button.textContent = "已批改";
         }
 
-        function handleExport() {
-            showToast('展演模式下，导出功能仅为演示。');
-        }
-
-        function handleImport() {
-            showToast('展演模式下，导入功能仅为演示。');
-        }
-
-        function handleReport() {
-            showToast('展演模式下，学习报告功能仅为演示。');
+        function handleDemoOnlyFeature(featureName) {
+            showToast(`展演模式下，${featureName}功能仅为UI演示。`);
         }
 
         // --- Event Listeners ---
@@ -246,20 +238,20 @@
             knowledgeInput.value = presetText;
             showToast('示例内容已加载到输入框！');
         });
-        reportBtn.addEventListener('click', handleReport);
-        exportBtn.addEventListener('click', handleExport);
-        importBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleImport);
+        reportBtn.addEventListener('click', () => handleDemoOnlyFeature('学习报告'));
+        exportBtn.addEventListener('click', () => handleDemoOnlyFeature('导出'));
+        importBtn.addEventListener('click', () => handleDemoOnlyFeature('导入'));
+        fileInput.addEventListener('change', () => handleDemoOnlyFeature('导入'));
 
         cardDisplayArea.addEventListener('click', (e) => {
             const target = e.target;
-            const deleteButton = target.closest('.delete-btn');
-            const questionButton = target.closest('.generate-question-btn');
-            const submitButton = target.closest('.submit-answer-btn');
-            const cardContainer = target.closest('.card-container-outer');
-
-            if (deleteButton) {
+            const interactiveElement = target.closest('.delete-btn, .generate-question-btn, .submit-answer-btn, .user-answer');
+            if (interactiveElement) {
                 e.stopPropagation();
+            }
+
+            const deleteButton = target.closest('.delete-btn');
+            if (deleteButton) {
                 const cardId = deleteButton.dataset.id;
                 knowledgeCards = knowledgeCards.filter(c => c.id != cardId);
                 renderCards(knowledgeCards);
@@ -267,22 +259,23 @@
                 return;
             }
             
+            const questionButton = target.closest('.generate-question-btn');
             if (questionButton) {
-                e.stopPropagation();
                 handleQuestionGeneration(questionButton.dataset.id);
                 questionButton.disabled = true;
                 questionButton.textContent = '题目已生成';
                 return;
             }
             
+            const submitButton = target.closest('.submit-answer-btn');
             if (submitButton) {
-                e.stopPropagation();
                 handleAnswerSubmission(submitButton.dataset.id, submitButton);
                 return;
             }
 
-            if (cardContainer) {
-                cardContainer.classList.toggle('is-flipped');
+            const cardContainer = target.closest('.card-container-outer');
+            if (cardContainer && !interactiveElement) {
+                 cardContainer.classList.toggle('is-flipped');
             }
         });
 
