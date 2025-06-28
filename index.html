@@ -62,7 +62,6 @@
                 <input type="file" id="file-input" class="hidden" accept=".json">
             </div>
         </aside>
-
         <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-8 flex-1">
             <div class="sticky top-0 bg-f3f4f6/80 backdrop-blur-sm z-10 py-4 mb-6"><input type="text" id="search-input" placeholder="搜索卡片内容..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 transition"></div>
             <div id="card-display-area" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
@@ -95,7 +94,8 @@
         const cannedQuestions = {
             "1": { question: "计算传播学与传统传播学最核心的方法论差异是什么？", keywords: ["计算", "数据", "方法", "量化"] },
             "2": { question: "在社交网络分析中，“中心性”通常用来衡量什么？", keywords: ["重要", "核心", "影响", "关键"] },
-            "3": { question: "请简述“情感分析”在商业领域的一个应用场景。", keywords: ["评论", "评价", "口碑", "舆情", "品牌"] }
+            "3": { question: "请简述“情感分析”在商业领域的一个应用场景。", keywords: ["评论", "评价", "口碑", "舆情", "品牌"] },
+            "4": { question: "数据驱动的洞察力如何与社会科学的理论相结合？请举例说明。", keywords: ["结合", "验证", "补充", "理论", "数据"] }
         };
 
         const initialCards = [
@@ -202,14 +202,14 @@
                     <p class="font-semibold">${canned.question}</p>
                     <textarea class="user-answer w-full p-2 border rounded-md text-sm" rows="4" placeholder="请在此输入你的回答..."></textarea>
                     <button data-id="${cardId}" class="submit-answer-btn w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700">提交批改</button>
-                    <div class="feedback-display"></div>
                 </div>`;
         }
 
         function handleAnswerSubmission(cardId, button) {
             const sessionArea = document.getElementById(`test-session-${cardId}`);
             const userAnswer = sessionArea.querySelector('.user-answer').value.trim();
-            const feedbackDisplay = sessionArea.querySelector('.feedback-display');
+            const feedbackDisplay = document.createElement('div');
+            
             if (!userAnswer) {
                 showToast("回答不能为空哦", "error"); return;
             }
@@ -222,9 +222,17 @@
             } else {
                 feedbackHTML = `<div class="mt-2 p-2 rounded-md text-sm feedback-incorrect"><h4 class="font-bold">再想想看？</h4><p>你的回答似乎偏离了核心。提示：可以往 "${canned.keywords.join('、')}" 这些方面思考。</p></div>`;
             }
+            
+            button.parentElement.appendChild(feedbackDisplay);
             feedbackDisplay.innerHTML = feedbackHTML;
-            button.disabled = true;
-            button.textContent = "已批改";
+            button.remove(); // 移除“提交批改”按钮
+
+            // 添加“再试一次”按钮
+            const tryAgainBtn = document.createElement('button');
+            tryAgainBtn.dataset.id = cardId;
+            tryAgainBtn.className = 'retry-btn mt-2 w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600 transition';
+            tryAgainBtn.textContent = '再试一次';
+            sessionArea.appendChild(tryAgainBtn);
         }
 
         function handleDemoOnlyFeature(featureName) {
@@ -241,11 +249,10 @@
         reportBtn.addEventListener('click', () => handleDemoOnlyFeature('学习报告'));
         exportBtn.addEventListener('click', () => handleDemoOnlyFeature('导出'));
         importBtn.addEventListener('click', () => handleDemoOnlyFeature('导入'));
-        fileInput.addEventListener('change', () => handleDemoOnlyFeature('导入'));
 
         cardDisplayArea.addEventListener('click', (e) => {
             const target = e.target;
-            const interactiveElement = target.closest('.delete-btn, .generate-question-btn, .submit-answer-btn, .user-answer');
+            const interactiveElement = target.closest('.delete-btn, .generate-question-btn, .submit-answer-btn, .user-answer, .retry-btn');
             if (interactiveElement) {
                 e.stopPropagation();
             }
@@ -262,14 +269,18 @@
             const questionButton = target.closest('.generate-question-btn');
             if (questionButton) {
                 handleQuestionGeneration(questionButton.dataset.id);
-                questionButton.disabled = true;
-                questionButton.textContent = '题目已生成';
                 return;
             }
             
             const submitButton = target.closest('.submit-answer-btn');
             if (submitButton) {
                 handleAnswerSubmission(submitButton.dataset.id, submitButton);
+                return;
+            }
+            
+            const retryButton = target.closest('.retry-btn');
+            if (retryButton) {
+                handleQuestionGeneration(retryButton.dataset.id);
                 return;
             }
 
