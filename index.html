@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunny Wang's Project Portfolio</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/tailwindcss/3.4.1/tailwind.min.js"></script>
+    <link rel="preconnect" href="https://fonts.google.cn">
+    <link href="https://fonts.google.cn/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .device-frame {
+            border: 8px solid #333;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            background-color: #333;
+        }
+        .device-header {
+            padding: 8px;
+            background: #333;
+            text-align: center;
+        }
+        .device-header::before {
+            content: '● ● ●';
+            color: #888;
+            font-size: 10px;
+            display: block;
+            text-align: left;
+            padding-left: 5px;
+        }
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div class="container mx-auto px-4 py-12 md:py-20">
+        <header class="text-center mb-12 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Sunny Wang</h1>
+            <p class="mt-3 text-lg text-gray-600">个人项目作品集</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+
+            <div class="lg:col-span-3">
+                <div class="device-frame">
+                    <div class="device-header"></div>
+                    <iframe src="./app.html" frameborder="0" class="w-full h-[600px] md:h-[700px] bg-white"></iframe>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 flex flex-col justify-center space-y-6">
+                <div class="content-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-indigo-600 mb-2">学练测评卡片</h2>
+                    <p class="text-md text-gray-600 mb-4 font-medium">—— 记录知识生成闪卡，即时练习与反馈。</p>
+                    <div class="prose prose-sm max-w-none text-gray-700">
+                        <p><strong>项目动机：</strong>为解决“学”与“练”脱节的问题，我构思并开发了这款应用。它能将任何文本资料迅速转化为结构化的学习卡片，并提供即时的AI测评反馈，形成“学习-练习-测评”的高效闭环。</p>
+                        <p><strong>核心特色：</strong></p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>交互式卡片设计，支持翻转、检索与状态标记。</li>
+                            <li>AI驱动的内容生成与智能问答。</li>
+                            <li>可视化的学习报告，追踪掌握进度。</li>
+                            <li>支持数据本地导入与导出，保护用户隐私。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card p-6 md:p-8 bg-sky-50 border border-sky-200">
+                     <h3 class="text-xl font-bold text-sky-800 mb-3">开发者注记 (Developer's Note)</h3>
+                    <div class="prose prose-sm max-w-none text-gray-700">
+                       <p>本项目核心特色是与后端AI服务深度集成。为确保在任何网络环境下都能流畅展示应用的前端设计与交互逻辑，当前版本以 **“展演模式”(Exhibition Mode)** 运行。</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>您看到的是：</strong>应用完整的UI界面、精心设计的交互动效，以及我预置的示例卡片，您可以体验卡片的翻转、搜索等前端功能。</li>
+                            <li><strong>展演模式限制：</strong>所有需要实时调用AI服务器的按钮（如“AI智能生成卡片”）在此模式下未激活，点击会弹出提示。</li>
+                        </ul>
+                        <p>这个项目充分展示了我在前端开发(HTML/CSS/JS)、UI/UX设计以及API集成方面的综合能力。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
