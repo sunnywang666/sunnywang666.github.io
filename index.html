@@ -3,70 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunny Wang's Project Portfolio</title>
-    <script src="https://cdn.bootcdn.net/ajax/libs/tailwindcss/3.4.1/tailwind.min.js"></script>
+    <title>Sunny Wang's Project: 学练测评卡片</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.google.cn">
-    <link href="https://fonts.google.cn/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.google.cn/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Noto Sans SC', sans-serif;
-            background-color: #f4f7f9;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-        .iframe-container {
-            border: 1px solid #e2e8f0;
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .card-container-outer {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             border-radius: 0.75rem;
-            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            background-color: white;
             overflow: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f0f9ff;
+        }
+        .card-content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .example-block {
+            border-top: 1px dashed #d1d5db;
+            padding-top: 0.75rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: #4b5563;
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
+<body class="text-gray-800">
 
-    <header class="w-full bg-white py-12 sm:py-16 border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight">学练测评卡片</h1>
-            <p class="mt-4 text-lg text-gray-600">Sunny Wang 的个人项目作品</p>
-        </div>
-    </header>
-
-    <main class="w-full py-12 sm:py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-2xl font-bold text-center mb-8">应用在线体验 (Live Demo)</h2>
-            <div class="iframe-container">
-                <iframe src="./app.html" frameborder="0" class="w-full bg-white" style="height: 85vh;"></iframe>
+    <div class="bg-white p-6 md:p-8 border-b border-gray-200">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-900">学练测评卡片</h1>
+            <p class="mt-2 text-gray-600">A Project by Sunny Wang</p>
+            <div class="mt-4 text-sm text-gray-700 space-y-2">
+                <p><strong>项目动机：</strong>为解决“学”与“练”脱节的问题，我构思并开发了这款应用。它能将任何文本资料迅速转化为结构化的学习卡片，并提供即时的AI测评反馈，形成“学习-练习-测评”的高效闭环。</p>
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <h3 class="font-semibold text-amber-800">开发者注记 (Developer's Note)</h3>
+                    <p class="text-amber-700 mt-1">为确保流畅展示，当前为**“展演模式”**。您可以体验预置卡片的交互功能，但所有实时调用AI服务器的按钮（如“AI智能生成卡片”）在此模式下未激活。</p>
+                </div>
             </div>
         </div>
-    </main>
-    
-    <section class="w-full bg-white py-12 sm:py-16 border-t border-gray-200">
-        <div class="max-w-4xl mx-auto px-6">
-             <h2 class="text-2xl font-bold text-center mb-8">项目解读</h2>
-             <div class="prose max-w-none lg:prose-lg text-gray-700">
-                <p><strong>动机与目标：</strong>为解决日常学习中“学”与“练”脱节的问题，我构思并独立开发了这款应用。它旨在将任何文本资料迅速转化为结构化的学习卡片，并提供即时的AI测评反馈，从而形成“学习-练习-测评”的高效学习闭环。</p>
+    </div>
+
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <aside class="w-full lg:w-1/3 xl:w-1/4 p-6 bg-white border-r border-gray-200 flex flex-col space-y-6">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <h1 class="text-2xl font-bold text-gray-900">应用面板</h1>
+            </div>
+            <div>
+                <label for="knowledge-input" class="text-sm font-semibold text-gray-700 mb-2 block">在这里输入或粘贴您的资料：</label>
+                <textarea id="knowledge-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition" placeholder="..."></textarea>
+            </div>
+            <button id="add-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 transition">AI智能生成卡片</button>
+            <hr class="border-gray-200">
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-800">工具箱</h2>
+                <button id="report-btn" class="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700">查看学习报告</button>
+                <button id="export-btn" class="w-full bg-gray-700 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800">导出为 JSON</button>
+                <button id="import-btn" class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50">导入 JSON 文件</button>
+            </div>
+        </aside>
+        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-8 flex-1">
+            <div class="sticky top-0 bg-f3f4f6/80 backdrop-blur-sm z-10 py-4 mb-6">
+                 <input type="text" id="search-input" placeholder="搜索示例卡片内容..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+            <div id="card-display-area" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+            </div>
+            <div id="empty-state" class="hidden h-full flex flex-col items-center justify-center text-center text-gray-500 mt-16">
+                 <h3 class="text-xl font-semibold">知识库为空</h3>
+            </div>
+        </main>
+    </div>
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 translate-y-10 transition-all duration-300">
+        <p id="toast-message"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardDisplayArea = document.getElementById('card-display-area');
+            const emptyState = document.getElementById('empty-state');
+            const searchInput = document.getElementById('search-input');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            let knowledgeCards = [];
+
+            const initialCards = [
+                { id: 1, knowledgePoint: "计算传播学 (Computational Communication)", example: "例如，通过分析社交媒体上几百万条帖子，来研究某个热门话题的传播路径和关键影响者。", history: [] },
+                { id: 2, knowledgePoint: "社交网络分析 (Social Network Analysis)", example: "在一家公司里，通过分析员工间的邮件往来，可以发现非正式的沟通核心和信息枢纽。", history: [] },
+                { id: 3, knowledgePoint: "自然语言处理 (Natural Language Processing - NLP)", example: "机器翻译、智能客服、以及从大量用户评论中自动提取情感倾向（正面/负面）都是NLP的应用。", history: [] }
+            ];
+
+            function showToast(message, type = 'info') {
+                toastMessage.textContent = message;
+                toast.className = 'fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-lg transition-all duration-300'; // Reset classes
+                let colorClass = 'bg-yellow-500';
+                if (type === 'success') colorClass = 'bg-green-500';
+                if (type === 'error') colorClass = 'bg-red-500';
+                toast.classList.add(colorClass);
+                toast.classList.remove('opacity-0', 'translate-y-10');
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-10');
+                }, 3000);
+            }
+            
+            function checkEmptyState() {
+                emptyState.style.display = (knowledgeCards.length === 0) ? 'flex' : 'none';
+            }
+
+            function renderCard(card) {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container-outer min-h-[18rem] h-auto';
+                cardContainer.dataset.id = card.id;
+                const exampleHTML = card.example ? `<div class="example-block">${card.example}</div>` : '';
                 
-                <h3 class="font-semibold">核心特色：</h3>
-                <ul>
-                    <li><strong>交互式卡片设计：</strong>支持卡片翻转、内容检索与学习状态标记，界面友好直观。</li>
-                    <li><strong>AI驱动的内容生成：</strong>集成AI能力，可将大段文本一键智能分解为核心知识点和相关实例。</li>
-                    <li><strong>可视化的学习报告：</strong>通过图表追踪用户的掌握进度，提供清晰的学习反馈。</li>
-                    <li><strong>数据的导入与导出：</strong>支持将学习库以JSON格式导出备份，或导入已有数据，充分尊重用户的数据所有权。</li>
-                </ul>
+                cardContainer.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-content-area">
+                                <h3 class="text-lg font-semibold text-gray-800">${card.knowledgePoint}</h3>
+                                ${exampleHTML}
+                            </div>
+                            <div class="flex justify-end items-center mt-4 pt-2 border-t">
+                                <button data-id="${card.id}" class="delete-btn text-gray-400 hover:text-red-500 transition-colors p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-back flex flex-col justify-center items-center text-center p-4">
+                           <h4 class="font-semibold text-lg text-sky-700">更多交互待解锁</h4>
+                           <p class="text-sm text-gray-600 mt-2">在完整版应用中，背面将提供AI出题与测评功能。</p>
+                        </div>
+                    </div>`;
+                return cardContainer;
+            }
 
-                <hr class="my-8">
+            function renderCards(cards) {
+                cardDisplayArea.innerHTML = '';
+                if(cards && cards.length > 0) {
+                    cards.forEach(card => {
+                        const cardElement = renderCard(card);
+                        cardDisplayArea.appendChild(cardElement);
+                    });
+                }
+                checkEmptyState();
+            }
+            
+            function searchCards() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredCards = knowledgeCards.filter(card => 
+                    card.knowledgePoint.toLowerCase().includes(searchTerm) || (card.example && card.example.toLowerCase().includes(searchTerm))
+                );
+                renderCards(filteredCards);
+            }
 
-                <h3 class="font-semibold">开发者注记 (Developer's Note)</h3>
-                <blockquote class="border-l-4 border-indigo-300 pl-4 italic">
-                    <p>本应用的核心特色与后端AI服务深度集成。为确保在任何网络环境下都能流畅展示应用的前端设计与交互逻辑，当前版本以 **“展演模式”(Exhibition Mode)** 运行。</p>
-                    <p>在展演模式下，您可以体验包括卡片翻转、搜索、查看报告在内的所有前端功能。所有需要实时调用AI服务器的按钮（如“AI智能生成卡片”）则会弹出提示，功能未激活。</p>
-                    <p>这个项目充分展示了我在前端开发(HTML/CSS/JS)、UI/UX设计以及API集成方面的综合能力。</p>
-                </blockquote>
-             </div>
-        </div>
-    </section>
+            // --- Event Listeners for Demo Mode ---
+            document.getElementById('add-btn').addEventListener('click', () => showToast('展演模式下AI功能已禁用'));
+            document.getElementById('report-btn').addEventListener('click', () => showToast('请先导入或生成卡片以查看报告'));
+            document.getElementById('export-btn').addEventListener('click', () => showToast('请先导入或生成卡片以进行导出'));
+            document.getElementById('import-btn').addEventListener('click', () => showToast('展演模式下此功能已禁用'));
+            searchInput.addEventListener('input', searchCards);
 
-    <footer class="text-center py-8">
-        <p class="text-gray-500">&copy; 2025 Sunny Wang. All Rights Reserved.</p>
-    </footer>
+            cardDisplayArea.addEventListener('click', (e) => {
+                const target = e.target;
+                const deleteButton = target.closest('.delete-btn');
+                if (deleteButton) {
+                    e.stopPropagation();
+                    const cardId = deleteButton.dataset.id;
+                    knowledgeCards = knowledgeCards.filter(c => c.id != cardId);
+                    renderCards(knowledgeCards);
+                    showToast('示例卡片已删除', 'success');
+                    return;
+                }
+                const cardContainer = target.closest('.card-container-outer');
+                if (cardContainer) {
+                     cardContainer.classList.toggle('is-flipped');
+                }
+            });
 
+            // --- Initial Load ---
+            knowledgeCards = initialCards;
+            renderCards(knowledgeCards);
+        });
+    </script>
 </body>
 </html>
