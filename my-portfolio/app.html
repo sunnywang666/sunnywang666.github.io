@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识卡片管理器 (带学习报告)</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/tailwindcss/3.4.1/tailwind.min.js"></script>
+    <link rel="preconnect" href="https://fonts.google.cn">
+    <link href="https://fonts.google.cn/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .card-container-outer {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border-radius: 0.75rem;
+        }
+        .is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            background-color: white;
+            overflow: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f0f9ff;
+        }
+        .card-content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding-right: 0.5rem;
+        }
+        .example-block {
+            border-top: 1px dashed #d1d5db;
+            padding-top: 0.75rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: #4b5563;
+        }
+        .history-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .feedback-correct {
+            border-left: 4px solid #22c55e;
+            background-color: #f0fdf4;
+        }
+        .feedback-incorrect {
+            border-left: 4px solid #f97316;
+            background-color: #fff7ed;
+        }
+        .history-log, .report-list {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s, visibility 0.5s, padding 0.5s;
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            overflow: hidden;
+            padding: 0;
+        }
+        .history-log.expanded, .report-list.expanded {
+            max-height: 500px;
+            opacity: 1;
+            visibility: visible;
+            padding: 0.5rem;
+            overflow-y: auto;
+        }
+        .report-section-header svg {
+            transition: transform 0.3s;
+        }
+        .report-section-header.expanded svg {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <aside class="w-full lg:w-1/3 xl:w-1/4 p-6 bg-white border-r border-gray-200 flex flex-col space-y-6">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <h1 class="text-2xl font-bold text-gray-900">学练测评卡片</h1>
+            </div>
+            <div>
+                <label for="knowledge-input" class="text-sm font-semibold text-gray-700 mb-2 block">在这里输入或粘贴您的资料：</label>
+                <textarea id="knowledge-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition" placeholder="粘贴任何文本，AI 将为您提炼知识点和实例..."></textarea>
+            </div>
+            <button id="add-btn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-center space-x-2">
+                <svg id="add-btn-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                <span id="add-btn-text">AI智能生成卡片</span>
+            </button>
+            <hr class="border-gray-200">
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-gray-800">工具箱</h2>
+                <button id="report-btn" class="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>
+                    <span>查看学习报告</span>
+                </button>
+                <button id="export-btn" class="w-full bg-gray-700 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 flex items-center justify-center space-x-2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>导出为 JSON</span>
+                </button>
+                <button id="import-btn" class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 flex items-center justify-center space-x-2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <span>导入 JSON 文件</span>
+                </button>
+                <input type="file" id="file-input" class="hidden" accept=".json">
+            </div>
+        </aside>
+
+        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-8 flex-1">
+            <div class="sticky top-0 bg-f3f4f6/80 backdrop-blur-sm z-10 py-4 mb-6">
+                 <input type="text" id="search-input" placeholder="搜索示例卡片内容..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+            <div id="card-display-area" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+            </div>
+            <div id="empty-state" class="hidden h-full flex flex-col items-center justify-center text-center text-gray-500 mt-16">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 text-gray-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                 <h3 class="text-xl font-semibold">知识库为空</h3>
+                 <p class="mt-2 max-w-md">请在左侧输入内容并点击“AI智能生成卡片”，或导入JSON文件。</p>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 translate-y-10 transition-all duration-300">
+        <p id="toast-message"></p>
+    </div>
+
+    <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
+         <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 w-full max-w-2xl transform transition-all" id="report-modal-content">
+             <div class="flex justify-between items-center mb-6">
+                 <h2 class="text-2xl font-bold text-gray-800">学习情况报告</h2>
+                 <button id="close-modal-btn" class="text-gray-400 hover:text-gray-800 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                 </button>
+             </div>
+             <div class="space-y-5">
+                 <div class="p-4 rounded-lg bg-gray-50">
+                     <div class="flex justify-between items-baseline mb-2">
+                         <p class="font-semibold text-gray-700">总卡片数:</p> 
+                         <p class="text-2xl font-bold text-indigo-600" id="total-cards">0</p>
+                     </div>
+                     <div>
+                         <p class="font-semibold text-gray-700 mb-2">掌握进度:</p>
+                         <div class="w-full bg-gray-200 rounded-full h-4">
+                             <div id="mastery-progress" class="bg-green-500 h-4 rounded-full transition-all duration-500 flex items-center justify-center text-xs font-bold text-white" style="width: 0%;">0%</div>
+                         </div>
+                     </div>
+                 </div>
+                 <div id="report-details" class="space-y-2">
+                 </div>
+             </div>
+         </div>
+     </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const knowledgeInput = document.getElementById('knowledge-input');
+            const addBtn = document.getElementById('add-btn');
+            const searchInput = document.getElementById('search-input');
+            const cardDisplayArea = document.getElementById('card-display-area');
+            const exportBtn = document.getElementById('export-btn');
+            const importBtn = document.getElementById('import-btn');
+            const fileInput = document.getElementById('file-input');
+            const emptyState = document.getElementById('empty-state');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const reportBtn = document.getElementById('report-btn');
+            const reportModal = document.getElementById('report-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const totalCardsSpan = document.getElementById('total-cards');
+            const masteryProgress = document.getElementById('mastery-progress');
+            const reportDetailsContainer = document.getElementById('report-details');
+
+            // --- 预置的示例卡片 ---
+            let knowledgeCards = [
+                {
+                    id: 1,
+                    knowledgePoint: "计算传播学 (Computational Communication)",
+                    example: "例如，通过分析社交媒体上几百万条帖子，来研究某个热门话题的传播路径和关键影响者。",
+                    history: [
+                        { question: "什么是计算传播学？", userAnswer: "利用大数据和算法研究人类传播行为的学科。", feedback: { isCorrect: true, feedbackTitle: "回答正确！", explanation: "概括得很好！计算传播学正是融合了计算机科学与传播学，用计算方法解决传统传播学问题的交叉学科。" } }
+                    ]
+                },
+                {
+                    id: 2,
+                    knowledgePoint: "社交网络分析 (Social Network Analysis)",
+                    example: "在一家公司里，通过分析员工间的邮件往来，可以发现非正式的沟通核心和信息枢纽。",
+                    history: []
+                },
+                {
+                    id: 3,
+                    knowledgePoint: "自然语言处理 (Natural Language Processing - NLP)",
+                    example: "机器翻译、智能客服、以及从大量用户评论中自动提取情感倾向（正面/负面）都是NLP的应用。",
+                    history: []
+                }
+            ];
+
+            function showToast(message, type = 'success') {
+                toastMessage.textContent = message;
+                toast.className = toast.className.replace(/bg-green-500|bg-red-500|bg-yellow-500/g, '');
+                let colorClass = 'bg-green-500';
+                if (type === 'error') colorClass = 'bg-red-500';
+                if (type === 'info') colorClass = 'bg-yellow-500';
+                toast.classList.add(colorClass);
+                toast.classList.remove('opacity-0', 'translate-y-10');
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-10');
+                }, 3000);
+            }
+            
+            function checkEmptyState() {
+                emptyState.classList.toggle('hidden', cardDisplayArea.children.length > 0);
+            }
+
+            function getStatusInfo(card) {
+                const MASTERY_THRESHOLD = 2;
+                if (!card.history || card.history.length === 0) {
+                    return { text: '未学习', colorClass: 'bg-gray-400' };
+                }
+                if (card.history.length < MASTERY_THRESHOLD) {
+                    return { text: '练习中', colorClass: 'bg-orange-500' };
+                }
+                const lastAttempts = card.history.slice(-MASTERY_THRESHOLD);
+                const isMastered = lastAttempts.every(attempt => attempt.feedback.isCorrect);
+                if (isMastered) {
+                    return { text: '已掌握', colorClass: 'bg-green-500' };
+                } else {
+                    return { text: '练习中', colorClass: 'bg-orange-500' };
+                }
+            }
+
+            function renderCard(card) {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container-outer min-h-[24rem] h-auto';
+                cardContainer.dataset.id = card.id;
+
+                const exampleHTML = card.example ? `<div class="example-block"><strong>例子:</strong> ${card.example.replace(/\n/g, '<br>')}</div>` : '';
+                const statusInfo = getStatusInfo(card);
+
+                cardContainer.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="card-content-area">
+                                <h3 class="text-lg font-semibold text-gray-800">${card.knowledgePoint}</h3>
+                                ${exampleHTML}
+                            </div>
+                            <div class="flex justify-between items-center mt-4 pt-2 border-t">
+                                <div class="learning-status flex items-center text-xs font-medium">
+                                    <span class="w-2.5 h-2.5 rounded-full mr-2 ${statusInfo.colorClass}"></span>
+                                    <span class="text-gray-600">${statusInfo.text}</span>
+                                </div>
+                                <button data-id="${card.id}" class="delete-btn text-gray-400 hover:text-red-500 transition-colors z-10 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="flex justify-between items-center mb-2 pb-2 border-b">
+                                <h4 class="font-semibold">学习自测</h4>
+                                <button data-id="${card.id}" class="toggle-history-btn text-sm text-indigo-600 hover:text-indigo-800 font-medium py-1 px-2 rounded-lg flex items-center">
+                                    <span>查看历史</span>
+                                    <span class="history-count text-xs bg-indigo-100 text-indigo-800 font-bold rounded-full px-2 py-0.5 ml-2">0</span>
+                                </button>
+                            </div>
+                            <div class="card-content-area">
+                                <div class="history-log bg-gray-50 p-2 rounded-md"></div>
+                                <div class="active-session-area mt-2"></div>
+                            </div>
+                            <div class="flex-shrink-0 pt-2 mt-2 border-t">
+                                <button data-id="${card.id}" class="generate-question-btn w-full bg-sky-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-sky-600 transition flex items-center justify-center space-x-2">
+                                    <span>AI出题检测</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return cardContainer;
+            }
+            
+            function updateCardHistory(cardId) {
+                const cardData = knowledgeCards.find(c => c.id === cardId);
+                const cardElement = document.querySelector(`.card-container-outer[data-id="${cardId}"]`);
+                if (!cardData || !cardElement) return;
+
+                const historyLog = cardElement.querySelector('.history-log');
+                const historyCount = cardElement.querySelector('.history-count');
+                
+                historyCount.textContent = cardData.history.length;
+                if (cardData.history.length > 0) {
+                    historyLog.innerHTML = cardData.history.map((entry, index) => `
+                        <div class="history-item text-sm">
+                            <p class="font-semibold text-gray-600">历史记录 ${index + 1}:</p>
+                            <p class="mt-1"><strong>题目:</strong> ${entry.question.replace(/\n/g, '<br>')}</p>
+                            <p class="mt-1"><strong>你的回答:</strong> ${entry.userAnswer.replace(/\n/g, '<br>')}</p>
+                            <div class="mt-2 p-2 rounded-md ${entry.feedback.isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                                <h4 class="font-bold">${entry.feedback.feedbackTitle}</h4>
+                                <p class="text-gray-700">${entry.feedback.explanation.replace(/\n/g, '<br>')}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    historyLog.innerHTML = `<p class="text-sm text-center text-gray-500 py-4">暂无历史记录</p>`;
+                }
+            }
+
+            function renderCards(cards = knowledgeCards) {
+                cardDisplayArea.innerHTML = '';
+                cards.forEach(card => {
+                    const cardElement = renderCard(card);
+                    cardDisplayArea.appendChild(cardElement);
+                    updateCardHistory(card.id);
+                });
+                checkEmptyState();
+            }
+            
+            function showLearningReport() {
+                const total = knowledgeCards.length;
+                if (total === 0) {
+                    showToast('知识库为空，没有报告可查看。', 'error');
+                    return;
+                }
+                const reportData = { mastered: [], practicing: [], unlearned: [] };
+                knowledgeCards.forEach(card => {
+                    const status = getStatusInfo(card).text;
+                    if (status === '已掌握') reportData.mastered.push(card);
+                    else if (status === '练习中') reportData.practicing.push(card);
+                    else reportData.unlearned.push(card);
+                });
+                const masteryPercentage = total > 0 ? (reportData.mastered.length / total) * 100 : 0;
+                totalCardsSpan.textContent = total;
+                masteryProgress.style.width = `${masteryPercentage}%`;
+                masteryProgress.textContent = `${Math.round(masteryPercentage)}%`;
+                
+                reportDetailsContainer.innerHTML = ''; 
+                const createSection = (title, cards, colorClass) => {
+                    if (cards.length === 0) return '';
+                    const cardList = cards.map(card => `<li class="py-1 px-2 truncate">${card.knowledgePoint}</li>`).join('');
+                    return `
+                        <div class="border rounded-lg">
+                            <button class="report-section-header w-full flex justify-between items-center p-3 text-left">
+                                <div class="flex items-center"><span class="w-3 h-3 rounded-full ${colorClass} mr-3"></span><span class="font-semibold">${title}</span></div>
+                                <div class="flex items-center"><span class="text-gray-600 font-bold mr-2">${cards.length}</span><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
+                            </button>
+                            <div class="report-list bg-gray-50 border-t"><ul class="list-disc list-inside p-3 text-sm text-gray-700">${cardList}</ul></div>
+                        </div>`;
+                }
+                reportDetailsContainer.innerHTML += createSection('已掌握', reportData.mastered, 'bg-green-500');
+                reportDetailsContainer.innerHTML += createSection('练习中', reportData.practicing, 'bg-orange-500');
+                reportDetailsContainer.innerHTML += createSection('未学习', reportData.unlearned, 'bg-gray-400');
+                
+                reportModal.classList.remove('hidden');
+            }
+
+            function deleteCard(id) {
+                knowledgeCards = knowledgeCards.filter(card => card.id !== id);
+                renderCards();
+                showToast('示例卡片已删除。');
+            }
+
+            function searchCards() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredCards = knowledgeCards.filter(card => 
+                    card.knowledgePoint.toLowerCase().includes(searchTerm) || (card.example && card.example.toLowerCase().includes(searchTerm))
+                );
+                renderCards(filteredCards);
+            }
+            
+            function exportData() {
+                if (knowledgeCards.length === 0) {
+                    showToast('知识库为空，无需导出。', 'error');
+                    return;
+                }
+                const dataStr = JSON.stringify(knowledgeCards, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.download = `knowledge-base-data-${new Date().toISOString().slice(0,10)}.json`;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+                showToast('已成功导出！');
+            }
+
+            function importData(event) {
+                 showToast('展演模式下此功能已禁用。', 'info');
+                 fileInput.value = '';
+            }
+
+            // --- Event Listeners ---
+            addBtn.addEventListener('click', () => showToast('展演模式下AI生成功能已禁用。', 'info'));
+            searchInput.addEventListener('input', searchCards);
+            exportBtn.addEventListener('click', exportData);
+            importBtn.addEventListener('click', () => showToast('展演模式下此功能已禁用。', 'info'));
+            fileInput.addEventListener('change', importData);
+            reportBtn.addEventListener('click', showLearningReport);
+            closeModalBtn.addEventListener('click', () => reportModal.classList.add('hidden'));
+            reportModal.addEventListener('click', (e) => {
+                if (e.target.id === 'report-modal') reportModal.classList.add('hidden');
+            });
+
+            cardDisplayArea.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                const interactiveElement = target.closest('.delete-btn, .generate-question-btn, .toggle-history-btn');
+                if (interactiveElement) e.stopPropagation();
+
+                const deleteButton = target.closest('.delete-btn');
+                if (deleteButton) {
+                    deleteCard(parseFloat(deleteButton.dataset.id));
+                    return;
+                }
+                
+                const questionButton = target.closest('.generate-question-btn');
+                if (questionButton) {
+                    showToast('展演模式下AI出题功能已禁用。', 'info');
+                    return;
+                }
+                
+                const historyButton = target.closest('.toggle-history-btn');
+                if (historyButton) {
+                    const cardElement = historyButton.closest('.card-container-outer');
+                    const historyLog = cardElement.querySelector('.history-log');
+                    const buttonSpan = historyButton.querySelector('span:first-child');
+                    historyLog.classList.toggle('expanded');
+                    buttonSpan.textContent = historyLog.classList.contains('expanded') ? '隐藏历史' : '查看历史';
+                    return;
+                }
+
+                const cardContainer = target.closest('.card-container-outer');
+                if (cardContainer && !interactiveElement) {
+                     cardContainer.querySelector('.card-inner').parentElement.classList.toggle('is-flipped');
+                }
+            });
+            
+            reportDetailsContainer.addEventListener('click', (e) => {
+                const header = e.target.closest('.report-section-header');
+                if (header) {
+                    header.classList.toggle('expanded');
+                    const list = header.nextElementSibling;
+                    list.classList.toggle('expanded');
+                }
+            });
+
+            // --- Initial Render ---
+            renderCards();
+        });
+    </script>
+</body>
+</html>
