@@ -135,7 +135,6 @@
                 <input type="file" id="file-input" class="hidden" accept=".json">
             </div>
         </aside>
-
         <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-8 flex-1">
             <div class="sticky top-0 bg-f3f4f6/80 backdrop-blur-sm z-10 py-4 mb-6">
                  <input type="text" id="search-input" placeholder="搜索示例卡片内容..." class="w-full p-4 pl-12 border border-gray-300 rounded-full focus:ring-2 focus:ring-indigo-500 transition">
@@ -149,11 +148,9 @@
             </div>
         </main>
     </div>
-
     <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg opacity-0 translate-y-10 transition-all duration-300">
         <p id="toast-message"></p>
     </div>
-
     <div id="report-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
          <div class="bg-white rounded-xl shadow-xl p-6 sm:p-8 w-full max-w-2xl transform transition-all" id="report-modal-content">
              <div class="flex justify-between items-center mb-6">
@@ -180,8 +177,6 @@
              </div>
          </div>
      </div>
-
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const knowledgeInput = document.getElementById('knowledge-input');
@@ -201,27 +196,27 @@
             const masteryProgress = document.getElementById('mastery-progress');
             const reportDetailsContainer = document.getElementById('report-details');
 
-            // --- 预置的示例卡片 ---
+            // --- 预置的示例卡片 (修正版) ---
             let knowledgeCards = [
                 {
-                    id: 1,
-                    knowledgePoint: "计算传播学 (Computational Communication)",
-                    example: "例如，通过分析社交媒体上几百万条帖子，来研究某个热门话题的传播路径和关键影响者。",
-                    history: [
-                        { question: "什么是计算传播学？", userAnswer: "利用大数据和算法研究人类传播行为的学科。", feedback: { isCorrect: true, feedbackTitle: "回答正确！", explanation: "概括得很好！计算传播学正是融合了计算机科学与传播学，用计算方法解决传统传播学问题的交叉学科。" } }
+                    "id": 1,
+                    "knowledgePoint": "计算传播学 (Computational Communication)",
+                    "example": "例如，通过分析社交媒体上几百万条帖子，来研究某个热门话题的传播路径和关键影响者。",
+                    "history": [
+                        { "question": "什么是计算传播学？", "userAnswer": "利用大数据和算法研究人类传播行为的学科。", "feedback": { "isCorrect": true, "feedbackTitle": "回答正确！", "explanation": "概括得很好！计算传播学正是融合了计算机科学与传播学，用计算方法解决传统传播学问题的交叉学科。" } }
                     ]
                 },
                 {
-                    id: 2,
-                    knowledgePoint: "社交网络分析 (Social Network Analysis)",
-                    example: "在一家公司里，通过分析员工间的邮件往来，可以发现非正式的沟通核心和信息枢纽。",
-                    history: []
+                    "id": 2,
+                    "knowledgePoint": "社交网络分析 (Social Network Analysis)",
+                    "example": "在一家公司里，通过分析员工间的邮件往来，可以发现非正式的沟通核心和信息枢纽。",
+                    "history": []
                 },
                 {
-                    id: 3,
-                    knowledgePoint: "自然语言处理 (Natural Language Processing - NLP)",
-                    example: "机器翻译、智能客服、以及从大量用户评论中自动提取情感倾向（正面/负面）都是NLP的应用。",
-                    history: []
+                    "id": 3,
+                    "knowledgePoint": "自然语言处理 (Natural Language Processing - NLP)",
+                    "example": "机器翻译、智能客服、以及从大量用户评论中自动提取情感倾向（正面/负面）都是NLP的应用。",
+                    "history": []
                 }
             ];
 
@@ -263,10 +258,8 @@
                 const cardContainer = document.createElement('div');
                 cardContainer.className = 'card-container-outer min-h-[24rem] h-auto';
                 cardContainer.dataset.id = card.id;
-
                 const exampleHTML = card.example ? `<div class="example-block"><strong>例子:</strong> ${card.example.replace(/\n/g, '<br>')}</div>` : '';
                 const statusInfo = getStatusInfo(card);
-
                 cardContainer.innerHTML = `
                     <div class="card-inner">
                         <div class="card-front">
@@ -302,19 +295,16 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 return cardContainer;
             }
             
             function updateCardHistory(cardId) {
-                const cardData = knowledgeCards.find(c => c.id === cardId);
+                const cardData = knowledgeCards.find(c => c.id == cardId);
                 const cardElement = document.querySelector(`.card-container-outer[data-id="${cardId}"]`);
                 if (!cardData || !cardElement) return;
-
                 const historyLog = cardElement.querySelector('.history-log');
                 const historyCount = cardElement.querySelector('.history-count');
-                
                 historyCount.textContent = cardData.history.length;
                 if (cardData.history.length > 0) {
                     historyLog.innerHTML = cardData.history.map((entry, index) => `
@@ -326,8 +316,7 @@
                                 <h4 class="font-bold">${entry.feedback.feedbackTitle}</h4>
                                 <p class="text-gray-700">${entry.feedback.explanation.replace(/\n/g, '<br>')}</p>
                             </div>
-                        </div>
-                    `).join('');
+                        </div>`).join('');
                 } else {
                     historyLog.innerHTML = `<p class="text-sm text-center text-gray-500 py-4">暂无历史记录</p>`;
                 }
@@ -346,8 +335,7 @@
             function showLearningReport() {
                 const total = knowledgeCards.length;
                 if (total === 0) {
-                    showToast('知识库为空，没有报告可查看。', 'error');
-                    return;
+                    showToast('知识库为空，没有报告可查看。', 'error'); return;
                 }
                 const reportData = { mastered: [], practicing: [], unlearned: [] };
                 knowledgeCards.forEach(card => {
@@ -360,7 +348,6 @@
                 totalCardsSpan.textContent = total;
                 masteryProgress.style.width = `${masteryPercentage}%`;
                 masteryProgress.textContent = `${Math.round(masteryPercentage)}%`;
-                
                 reportDetailsContainer.innerHTML = ''; 
                 const createSection = (title, cards, colorClass) => {
                     if (cards.length === 0) return '';
@@ -377,16 +364,14 @@
                 reportDetailsContainer.innerHTML += createSection('已掌握', reportData.mastered, 'bg-green-500');
                 reportDetailsContainer.innerHTML += createSection('练习中', reportData.practicing, 'bg-orange-500');
                 reportDetailsContainer.innerHTML += createSection('未学习', reportData.unlearned, 'bg-gray-400');
-                
                 reportModal.classList.remove('hidden');
             }
 
             function deleteCard(id) {
-                knowledgeCards = knowledgeCards.filter(card => card.id !== id);
+                knowledgeCards = knowledgeCards.filter(card => card.id != id);
                 renderCards();
                 showToast('示例卡片已删除。');
             }
-
             function searchCards() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const filteredCards = knowledgeCards.filter(card => 
@@ -394,11 +379,9 @@
                 );
                 renderCards(filteredCards);
             }
-            
             function exportData() {
                 if (knowledgeCards.length === 0) {
-                    showToast('知识库为空，无需导出。', 'error');
-                    return;
+                    showToast('知识库为空，无需导出。', 'error'); return;
                 }
                 const dataStr = JSON.stringify(knowledgeCards, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -410,42 +393,32 @@
                 URL.revokeObjectURL(url);
                 showToast('已成功导出！');
             }
-
             function importData(event) {
                  showToast('展演模式下此功能已禁用。', 'info');
                  fileInput.value = '';
             }
-
-            // --- Event Listeners ---
             addBtn.addEventListener('click', () => showToast('展演模式下AI生成功能已禁用。', 'info'));
             searchInput.addEventListener('input', searchCards);
             exportBtn.addEventListener('click', exportData);
-            importBtn.addEventListener('click', () => showToast('展演模式下此功能已禁用。', 'info'));
+            importBtn.addEventListener('click', () => { fileInput.value = ''; showToast('展演模式下此功能已禁用。', 'info'); });
             fileInput.addEventListener('change', importData);
             reportBtn.addEventListener('click', showLearningReport);
             closeModalBtn.addEventListener('click', () => reportModal.classList.add('hidden'));
             reportModal.addEventListener('click', (e) => {
                 if (e.target.id === 'report-modal') reportModal.classList.add('hidden');
             });
-
             cardDisplayArea.addEventListener('click', (e) => {
                 const target = e.target;
-                
                 const interactiveElement = target.closest('.delete-btn, .generate-question-btn, .toggle-history-btn');
                 if (interactiveElement) e.stopPropagation();
-
                 const deleteButton = target.closest('.delete-btn');
                 if (deleteButton) {
-                    deleteCard(parseFloat(deleteButton.dataset.id));
-                    return;
+                    deleteCard(deleteButton.dataset.id); return;
                 }
-                
                 const questionButton = target.closest('.generate-question-btn');
                 if (questionButton) {
-                    showToast('展演模式下AI出题功能已禁用。', 'info');
-                    return;
+                    showToast('展演模式下AI出题功能已禁用。', 'info'); return;
                 }
-                
                 const historyButton = target.closest('.toggle-history-btn');
                 if (historyButton) {
                     const cardElement = historyButton.closest('.card-container-outer');
@@ -455,13 +428,11 @@
                     buttonSpan.textContent = historyLog.classList.contains('expanded') ? '隐藏历史' : '查看历史';
                     return;
                 }
-
                 const cardContainer = target.closest('.card-container-outer');
                 if (cardContainer && !interactiveElement) {
                      cardContainer.querySelector('.card-inner').parentElement.classList.toggle('is-flipped');
                 }
             });
-            
             reportDetailsContainer.addEventListener('click', (e) => {
                 const header = e.target.closest('.report-section-header');
                 if (header) {
@@ -470,8 +441,6 @@
                     list.classList.toggle('expanded');
                 }
             });
-
-            // --- Initial Render ---
             renderCards();
         });
     </script>
